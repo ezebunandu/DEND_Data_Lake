@@ -37,3 +37,25 @@ The log files are partitioned by year and month. For example, here are filepaths
 
     log_data/2018/11/2018-11-12-events.json
     log_data/2018/11/2018-11-13-events.json
+
+## Deployment
+
+We will be adopting a cloud-based deployment model for this ETL process, with an EMR cluster for running the ETL job and s3 buckets for holding the output tables
+
+* Set up s3 buckets for the EMR cluster logs and output files
+* Run `create_cluster.sh` to create the EMR cluster
+* Connect to the EMR cluster master node using the secure shell (ssh) protocol
+* Copy the etl.py file to the master node of the EMR cluster using the secure copy (scp) protocol/tool
+* Submit the Spark job by running the command below
+
+`spark-submit etl.py --master yarn --deploy-mode client --driver-memory 4g --num-executors 2 --executor-memory 2g --executor-core 2`
+
+If all goes well, the EMR cluster will begin running the ETL job and the master node will continuously output logs to standard out
+
+![Spark Job Running](pictures/spark_running_cluster.jpeg)
+
+At the end of the ETL job, we would end up with dimensional tables for Users, Songs, Artists, Songplays and Time as parquet files in the output s3 bucket.
+
+These parquet files can be queried by downstream Spark jobs by the analytics teams.
+
+![Output Files](pictures/S3_with_output_tables.jpeg)
